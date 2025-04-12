@@ -14,8 +14,8 @@ warnings.filterwarnings('ignore')
 def load_data(train_path, test_path):
     
     print("Loading datasets...")
-    train_df = pd.read_csv('FakeNewsDetection/Codes/Traditional_ML_based_Methods/train.csv')
-    test_df = pd.read_csv('FakeNewsDetection/Codes/Traditional_ML_based_Methods/test.csv')
+    train_df = pd.read_csv('datasets/train.csv')
+    test_df = pd.read_csv('datasets/test.csv')
     
     # Map text labels to binary values if needed
     if train_df['Label'].dtype == object:
@@ -200,8 +200,8 @@ def analyze_features(model, feature_names):
 # Main execution function
 def main():
     # Paths to data
-    train_path = "FakeNewsDetection/Codes/Traditional_ML_based_Methods/train.csv"  
-    test_path = "FakeNewsDetection/Codes/Traditional_ML_based_Methods/test.csv"    
+    train_path = "datasets/train.csv"  
+    test_path = "datasets/train.csv"    
     
     # Load and preprocess data
     train_df, test_df = load_data(train_path, test_path)

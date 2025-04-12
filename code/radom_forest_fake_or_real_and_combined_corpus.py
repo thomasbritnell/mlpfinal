@@ -18,8 +18,8 @@ def load_data():
     print("Loading datasets...")
     
     # Dataset 1 - needs label mapping
-    train_df1 = pd.read_csv('FakeNewsDetection/Codes/Traditional_ML_based_Methods/fake_or_real_news_train_feature.csv')
-    test_df1 = pd.read_csv('FakeNewsDetection/Codes/Traditional_ML_based_Methods/fake_or_real_news_test_feature.csv')
+    train_df1 = pd.read_csv('datasets/fake_or_real_news_train_feature.csv')
+    test_df1 = pd.read_csv('datasets/fake_or_real_news_test_feature.csv')
     
     # Map text labels to binary values for dataset 1
     label_map = {'FAKE': 0, 'REAL': 1}
@@ -27,8 +27,8 @@ def load_data():
     test_df1['label'] = test_df1['label'].map(label_map)
     
     # Dataset 2 - already has binary labels
-    train_df2 = pd.read_csv('FakeNewsDetection/Codes/Traditional_ML_based_Methods/fulltrain_Guardian_Nyt_binary_shuffled_feature.csv')
-    test_df2 = pd.read_csv('FakeNewsDetection/Codes/Traditional_ML_based_Methods/Mixed_and_fulltrain_feature.csv')
+    train_df2 = pd.read_csv('datasets/fulltrain_Guardian_Nyt_binary_shuffled_feature.csv')
+    test_df2 = pd.read_csv('datasets/Mixed_and_fulltrain_feature.csv')
     
     # Check if labels in Dataset 2 need to be converted to integers
     if train_df2['label'].dtype != 'int64':
