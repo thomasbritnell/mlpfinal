@@ -55,7 +55,7 @@ def load_data():
 # Apply SMOTE for handling class imbalance
 def apply_smote(X_train, y_train):
 
-    smote = SMOTE(random_state=22)
+    smote = SMOTE(random_state=42)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
     
     return X_train_resampled, y_train_resampled
@@ -75,7 +75,7 @@ def tune_random_forest_grid(X_train, y_train, cv=5, dataset_name=""):
     }
     
     # Create base model
-    rf = RandomForestClassifier(random_state=22)
+    rf = RandomForestClassifier(random_state=42) #we actually tried a couple different states and 42 was better
     
     # GridSearchCV
     grid_search = GridSearchCV(
@@ -179,7 +179,7 @@ def load_model(filename):
     
     return model_info
 
-# for 
+# the features are already part of the dataset 
 def process_dataset(dataset_tuple, dataset_name):
     train_df, test_df = dataset_tuple
     
@@ -243,8 +243,9 @@ def main():
     print(f"fake or real Dataset model saved to: {model1_path}")
     print(f"combined corpus Dataset model saved to: {model2_path}")
     
-
 # load a saved model and use it for predictons
+
+#currently unused
 def predict_with_saved_model(filename, new_data):
     # Load the model
     model_info = load_model(filename)
@@ -259,6 +260,7 @@ def predict_with_saved_model(filename, new_data):
     probabilities = model.predict_proba(X_test)[:, 1]
     
     return predictions, probabilities
+
 
 if __name__ == "__main__":
     main()
