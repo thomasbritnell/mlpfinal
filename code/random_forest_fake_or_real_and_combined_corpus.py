@@ -14,21 +14,22 @@ from datetime import datetime
 
 # Load and preprocess both datasets separately
 def load_data():
-    """Load and preprocess both datasets separately"""
-    print("Loading datasets...")
-    
+
+
+
     # Dataset 1 - needs label mapping
-    train_df1 = pd.read_csv('datasets/fake_or_real_news_train_feature.csv')
-    test_df1 = pd.read_csv('datasets/fake_or_real_news_test_feature.csv')
+    train_df1 = pd.read_csv('../datasets/fake_or_real_news_train_feature.csv')
+    test_df1 = pd.read_csv('../datasets/fake_or_real_news_test_feature.csv')
     
     # Map text labels to binary values for dataset 1
     label_map = {'FAKE': 0, 'REAL': 1}
     train_df1['label'] = train_df1['label'].map(label_map)
     test_df1['label'] = test_df1['label'].map(label_map)
     
+    
     # Dataset 2 - already has binary labels
-    train_df2 = pd.read_csv('datasets/fulltrain_Guardian_Nyt_binary_shuffled_feature.csv')
-    test_df2 = pd.read_csv('datasets/Mixed_and_fulltrain_feature.csv')
+    train_df2 = pd.read_csv('../datasets/fulltrain_Guardian_Nyt_binary_shuffled_feature.csv')
+    test_df2 = pd.read_csv('../datasets/Mixed_and_fulltrain_feature.csv')
     
     # Check if labels in Dataset 2 need to be converted to integers
     if train_df2['label'].dtype != 'int64':
@@ -37,35 +38,31 @@ def load_data():
         test_df2['label'] = test_df2['label'].astype(int)
     
     # Check class distribution for both datasets
-    print("FAKE OR REAL Dataset:")
+    print("real or fake dataset")
     train_class_dist1 = dict(train_df1['label'].value_counts())
     test_class_dist1 = dict(test_df1['label'].value_counts())
-    print(f"Class distribution - Train: {train_class_dist1}")
-    print(f"Class distribution - Test: {test_class_dist1}")
+    print(f"class distribution - Train: 1: {train_class_dist1[1]} 0: {train_class_dist1[0]}")
+    print(f"class distribution - Test: 1: {test_class_dist1[1]} 0: {test_class_dist1[0]}")
     
-    print("\nCOMBINED CORPUS Dataset:")
+    print("\ncombined corpus dataset:")
     train_class_dist2 = dict(train_df2['label'].value_counts())
     test_class_dist2 = dict(test_df2['label'].value_counts())
-    print(f"Class distribution - Train: {train_class_dist2}")
-    print(f"Class distribution - Test: {test_class_dist2}")
+    print(f"class distribution - Train: 1: {train_class_dist2[1]} 0: {train_class_dist2[0]}")
+    print(f"Class distribution - Test: 1: {test_class_dist2[1]} 0: {test_class_dist2[0]}")
     
     return (train_df1, test_df1), (train_df2, test_df2)
 
 # Apply SMOTE for handling class imbalance
 def apply_smote(X_train, y_train):
-    """Apply SMOTE oversampling to handle class imbalance"""
-    print("Applying SMOTE oversampling...")
-    smote = SMOTE(random_state=42)
+
+    smote = SMOTE(random_state=22)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
     
-    print(f"Original class distribution: {np.bincount(y_train)}")
-    print(f"Class distribution after SMOTE: {np.bincount(y_train_resampled)}")
     return X_train_resampled, y_train_resampled
 
 # GridSearchCV for hyperparameter tuning
 def tune_random_forest_grid(X_train, y_train, cv=5, dataset_name=""):
-    """Tune Random Forest hyperparameters using GridSearchCV"""
-    print(f"Starting GridSearchCV hyperparameter tuning for Random Forest on {dataset_name}...")
+
     start_time = time.time()
     
     # Create parameter grid
@@ -78,7 +75,7 @@ def tune_random_forest_grid(X_train, y_train, cv=5, dataset_name=""):
     }
     
     # Create base model
-    rf = RandomForestClassifier(random_state=42)
+    rf = RandomForestClassifier(random_state=22)
     
     # GridSearchCV
     grid_search = GridSearchCV(
@@ -107,10 +104,10 @@ def tune_random_forest_grid(X_train, y_train, cv=5, dataset_name=""):
 
 # Evaluate model function
 def evaluate_model(model, X_test, y_test, dataset_name):
-    """Evaluate model performance with various metrics"""
+
     # Get predictions
     y_pred = model.predict(X_test)
-    y_proba = model.predict_proba(X_test)[:, 1]
+    y_proba = model.predict_proba(X_test)[:, 1] #probability of each option
     
     # Calculate metrics
     accuracy = accuracy_score(y_test, y_pred)
@@ -127,53 +124,16 @@ def evaluate_model(model, X_test, y_test, dataset_name):
     print(f"F1 Score: {f1:.4f}")
     print(f"ROC AUC: {roc_auc:.4f}\n")
     
-    # Classification report
-    print(f"Classification Report for {dataset_name}:")
-    print(classification_report(y_test, y_pred))
-    
-    # Confusion matrix
-    print(f"Confusion Matrix for {dataset_name}:")
-    cm = confusion_matrix(y_test, y_pred)
-    print(cm)
-    
-    return {
-        'accuracy': accuracy,
-        'precision': precision,
-        'recall': recall,
-        'f1': f1,
-        'roc_auc': roc_auc,
-        'y_pred': y_pred,
-        'y_proba': y_proba
-    }
 
-# Function to analyze feature importance
-def analyze_features(model, feature_names, dataset_name):
-    """Analyze and print feature importance"""
-    feature_importances = model.feature_importances_
-    
-    # Sort feature importances
-    sorted_indices = np.argsort(feature_importances)[::-1]
-    
-    print(f"\nFeature Importance Ranking for {dataset_name}:")
-    for i in range(len(feature_names)):
-        idx = sorted_indices[i]
-        print(f"{feature_names[idx]} - {feature_importances[idx]:.4f}")
-        
-    # Return feature importance as a DataFrame for visualization
-    importance_df = pd.DataFrame({
-        'Feature': feature_names,
-        'Importance': feature_importances
-    })
-    importance_df = importance_df.sort_values('Importance', ascending=False)
-    return importance_df
 
-# Create feature engineering function to be applied to all datasets
+
+# create derived features
 def engineer_features(df):
-    """Apply feature engineering to the dataset"""
-    # Make a copy to avoid modifying the original
+
+    # to not modify the original
     df_copy = df.copy()
     
-    # Sentiment ratios
+    # Sentiment ratios (as found in the original dataset)
     df_copy['neg_pos_ratio'] = df_copy['sent_neg'] / (df_copy['sent_pos'] + 0.001)
     
     # Adjective density
@@ -184,9 +144,9 @@ def engineer_features(df):
     
     return df_copy
 
-# Function to save model and related information using pickle
+# save model to file
 def save_model(model, feature_columns, metrics, dataset_name):
-    """Save model, feature list, and metrics using pickle"""
+
     # Create models directory if it doesn't exist
     os.makedirs('models', exist_ok=True)
     
@@ -202,16 +162,15 @@ def save_model(model, feature_columns, metrics, dataset_name):
     }
     
     # Save the model info
-    filename = f"models/random_forest_{dataset_name.replace(' ', '_').lower()}_{timestamp}.pkl"
+    filename = f"models/random_forest_{dataset_name.replace(' ', '_').lower()}_{timestamp}.pickle"
     with open(filename, 'wb') as file:
         pickle.dump(model_info, file)
     
     print(f"\nModel for {dataset_name} saved to {filename}")
     return filename
 
-# Function to load a saved model
+# load saved models
 def load_model(filename):
-    """Load a saved model and its information"""
     with open(filename, 'rb') as file:
         model_info = pickle.load(file)
     
@@ -220,7 +179,7 @@ def load_model(filename):
     
     return model_info
 
-# Function to process a single dataset
+# for 
 def process_dataset(dataset_tuple, dataset_name):
     train_df, test_df = dataset_tuple
     
@@ -230,12 +189,10 @@ def process_dataset(dataset_tuple, dataset_name):
         'adjectives', 'WordCount', 'sent_neg', 'sent_neu', 'sent_pos'
     ]
     
-    # Create additional features
-    print(f"\nCreating additional features for {dataset_name}...")
     train_df = engineer_features(train_df)
     test_df = engineer_features(test_df)
     
-    # Add the engineered features to our feature list
+    # add the new features to the rest
     engineered_features = ['neg_pos_ratio', 'adj_density', 'word_article_ratio']
     feature_columns += engineered_features
     
@@ -247,25 +204,20 @@ def process_dataset(dataset_tuple, dataset_name):
     X_test = test_df[feature_columns].values
     y_test = test_df['label'].values
     
-    # Apply SMOTE to handle class imbalance
+    # smote for class imbalance
     X_train_resampled, y_train_resampled = apply_smote(X_train, y_train)
     
-    # Tune with GridSearchCV
+    # gridsearch cv
     best_rf_model = tune_random_forest_grid(
         X_train_resampled, y_train_resampled, cv=5, dataset_name=dataset_name
     )
     
-    # Evaluate the tuned model
-    print(f"\nEvaluating tuned model for {dataset_name}...")
     results = evaluate_model(best_rf_model, X_test, y_test, dataset_name)
     
-    # Analyze feature importance
-    importance_df = analyze_features(best_rf_model, feature_columns, dataset_name)
-    
-    # Save the model
+   
     saved_model_path = save_model(best_rf_model, feature_columns, results, dataset_name)
     
-    return results, importance_df, best_rf_model, saved_model_path
+    return results, best_rf_model, saved_model_path
 
 # Main execution function
 def main():
@@ -273,76 +225,38 @@ def main():
     dataset1, dataset2 = load_data()
     
     # Process Dataset 1
-    print("\n" + "="*50)
-    print("PROCESSING FAKE OR REAL Dataset")
-    print("="*50)
-    results1, importance_df1, model1, model1_path = process_dataset(dataset1, "FAKE OR REAL Dataset")
+    results1, model1, model1_path = process_dataset(dataset1, "fake or real Dataset")
     
     # Process Dataset 2
-    print("\n" + "="*50)
-    print("PROCESSING COMBINED CORPUS Dataset")
-    print("="*50)
-    results2, importance_df2, model2, model2_path = process_dataset(dataset2, "COMBINED CORPUS Dataset")
+ 
+ 
+    results2, model2, model2_path = process_dataset(dataset2, "combined corpus Dataset")
     
     # Print a summary of performance for both datasets
-    print("\n" + "="*50)
-    print("PERFORMANCE SUMMARY")
-    print("="*50)
-    print(f"FAKE OR REAL Dataset - F1 Score: {results1['f1']:.4f}, Accuracy: {results1['accuracy']:.4f}")
-    print(f"COMBINED CORPUS Dataset - F1 Score: {results2['f1']:.4f}, Accuracy: {results2['accuracy']:.4f}")
-    
-    # Compare top features between datasets
-    print("\n" + "="*50)
-    print("TOP FEATURES COMPARISON")
-    print("="*50)
-    top_features1 = importance_df1.head(5)['Feature'].tolist()
-    top_features2 = importance_df2.head(5)['Feature'].tolist()
-    
-    print(f"Top 5 features for FAKE OR REAL Dataset: {', '.join(top_features1)}")
-    print(f"Top 5 features for COMBINED CORPUS Dataset: {', '.join(top_features2)}")
-    
-    # Find common important features
-    common_features = set(top_features1).intersection(set(top_features2))
-    print(f"\nCommon important features: {', '.join(common_features) if common_features else 'None'}")
-    
-    # Print saved model paths
-    print("\n" + "="*50)
-    print("SAVED MODELS")
-    print("="*50)
-    print(f"FAKE OR REAL Dataset model saved to: {model1_path}")
-    print(f"COMBINED CORPUS Dataset model saved to: {model2_path}")
-    
-    # Example of loading a saved model (commented out by default)
-    print("\n" + "="*50)
-    print("MODEL LOADING EXAMPLE")
-    print("="*50)
-    print("To load the saved models in another script, use:")
-    print(f"loaded_model_info = load_model('{model1_path}')")
-    print("model = loaded_model_info['model']")
-    print("feature_columns = loaded_model_info['feature_columns']")
-    print("metrics = loaded_model_info['metrics']")
+   
 
-# Function to make predictions with a saved model
+    print(f"fake or real Dataset - F1 Score: {results1['f1']:.4f}, Accuracy: {results1['accuracy']:.4f}")
+    print(f"combined corpus Dataset - F1 Score: {results2['f1']:.4f}, Accuracy: {results2['accuracy']:.4f}")
+    
+   
+    
+    print(f"fake or real Dataset model saved to: {model1_path}")
+    print(f"combined corpus Dataset model saved to: {model2_path}")
+    
+
+# load a saved model and use it for predictons
 def predict_with_saved_model(filename, new_data):
-    """Make predictions using a saved model"""
     # Load the model
     model_info = load_model(filename)
     model = model_info['model']
     feature_columns = model_info['feature_columns']
     
-    # Ensure new_data has the required features
-    if isinstance(new_data, pd.DataFrame):
-        # Engineer features if needed
-        new_data = engineer_features(new_data)
-        # Extract the required features
-        X = new_data[feature_columns].values
-    else:
-        # Assume new_data is already the right format
-        X = new_data
+    
+    X_test = new_data
     
     # Make predictions
-    predictions = model.predict(X)
-    probabilities = model.predict_proba(X)[:, 1]
+    predictions = model.predict(X_test)
+    probabilities = model.predict_proba(X_test)[:, 1]
     
     return predictions, probabilities
 
