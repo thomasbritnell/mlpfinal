@@ -15,8 +15,8 @@ warnings.filterwarnings('ignore')
 # Load and preprocess data
 def load_data():
     
-    train_df = pd.read_csv('datasets/train.csv')
-    test_df = pd.read_csv('datasets/test.csv')
+    train_df = pd.read_csv('../datasets/train.csv')
+    test_df = pd.read_csv('../datasets/test.csv')
     
     #encode the target 
     label_map = {False: 0, True: 1}
@@ -96,7 +96,7 @@ def combine_features(X_text_train, X_text_test, X_stats_train, X_stats_test):
 # smote for handling class imbalance
 def apply_smote(X_train, y_train):
 
-    smote = SMOTE(random_state=22)
+    smote = SMOTE(random_state=42)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
     
     print(f"Original class distribution: {np.bincount(y_train)}")
@@ -143,7 +143,18 @@ def evaluate_model(model, X_test, y_test):
     print(f"F1 Score: {f1:.4f}")
     print(f"ROC AUC: {roc_auc:.4f}\n")
     
-    
+# feature importance
+def analyze_features(model, feature_names):
+     """Analyze and print feature importance"""    """Analyze and print feature importance"""
+     feature_importances = model.feature_importances_
+     
+     # Sort feature importances
+     sorted_indices = np.argsort(feature_importances)[::-1]
+     
+     print("\nTop 10 Important Features:")
+     for i in range(min(10, len(feature_names))):
+         idx = sorted_indices[i]
+         print(f"{feature_names[idx]} - {feature_importances[idx]:.4f}")
 
 def main():  
     
@@ -171,6 +182,8 @@ def main():
     # Evaluate the model
     results = evaluate_model(rf_model, X_test, y_test)
     
+    all_feature_names = list(vectorizer.get_feature_names_out()) + list(train_features.columns)
+    analyze_features(rf_model, all_feature_names) 
     
     # Save the model
     import pickle

@@ -125,6 +125,25 @@ def evaluate_model(model, X_test, y_test, dataset_name):
     print(f"ROC AUC: {roc_auc:.4f}\n")
     
 
+    #compute feature importance
+def analyze_features(model, feature_names, dataset_name):
+     feature_importances = model.feature_importances_
+     
+     # Sort feature importances
+     sorted_indices = np.argsort(feature_importances)[::-1]
+     
+     print(f"\nFeature Importance Ranking for {dataset_name}:")
+     for i in range(len(feature_names)):
+         idx = sorted_indices[i]
+         print(f"{feature_names[idx]} - {feature_importances[idx]:.4f}")
+         
+     # Return feature importance as a DataFrame for visualization
+     importance_df = pd.DataFrame({
+         'Feature': feature_names,
+         'Importance': feature_importances
+     })
+     importance_df = importance_df.sort_values('Importance', ascending=False)
+     return importance_df
 
 
 # create derived features
@@ -216,8 +235,10 @@ def process_dataset(dataset_tuple, dataset_name):
     
    
     saved_model_path = save_model(best_rf_model, feature_columns, results, dataset_name)
+
+    importance_df = analyze_features(best_rf_model, feature_columns, dataset_name)
     
-    return results, best_rf_model, saved_model_path
+    return results, best_rf_model, importance_df, saved_model_path
 
 # Main execution function
 def main():
@@ -225,15 +246,28 @@ def main():
     dataset1, dataset2 = load_data()
     
     # Process Dataset 1
-    results1, model1, model1_path = process_dataset(dataset1, "fake or real Dataset")
+    results1, importance1,model1, model1_path = process_dataset(dataset1, "fake or real Dataset")
     
     # Process Dataset 2
  
  
-    results2, model2, model2_path = process_dataset(dataset2, "combined corpus Dataset")
+    results2, importance2,model2, model2_path = process_dataset(dataset2, "combined corpus Dataset")
     
+    top_features1 = importance1.head(5)['Feature'].tolist()
+    top_features2 = importance2.head(5)['Feature'].tolist()    
+    
+    print(f"Top 5 features for fake or real Dataset: {', '.join(top_features1)}")
+    print(f"Top 5 features for combined corpus Dataset: {', '.join(top_features2)}")
+    
+    # Find common important features
+    common_features = set(top_features1).intersection(set(top_features2))
+    print(f"\nCommon important features: {', '.join(common_features) if common_features else 'None'}")
+
+
+
     # Print a summary of performance for both datasets
    
+
 
     print(f"fake or real Dataset - F1 Score: {results1['f1']:.4f}, Accuracy: {results1['accuracy']:.4f}")
     print(f"combined corpus Dataset - F1 Score: {results2['f1']:.4f}, Accuracy: {results2['accuracy']:.4f}")
