@@ -8,11 +8,11 @@ This repository contains an implementation of a **Random Forest Classifier** for
 
 ## Repository Structure
 ```
-├── data
+├── datasets
 │   ├── train.csv
 │   ├── test.csv
 │   └── ...
-├── models
+├── code
 │   ├── random_forest_liar.py
 │   ├── random_forest_fake_or_real_and_combined_corpus.py
 │   report.ipynb
@@ -85,7 +85,7 @@ The most impactful features across datasets include:
 ---
 
 ## Model Artifacts
-Trained models are stored in the `models` directory and can be loaded for predictions using Python’s pickle module.
+Trained models are stored in the `root` directory and can be loaded for predictions using Python’s pickle module.
 
 Example:
 ```python
