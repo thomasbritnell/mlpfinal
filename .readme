@@ -1,2 +1,19 @@
 Anselm Che Fon 
 Thomas Britnell
+
+
+Instructions:
+
+1.
+create a fresh conda environment
+
+2.
+pip install -r requirements.txt
+
+3.
+Read through report.ipynb . The code should execute from there.
+
+4.
+If you are curious to see the random forest method used on the additional datasets, run:
+
+"python code/random_forest_fake_or_real_and_combined_corpus.py"
